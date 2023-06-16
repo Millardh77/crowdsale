@@ -9,6 +9,13 @@ contract Crowdsale {
     uint256 public price;
     uint256 public maxTokens;
     uint256 public tokensSold;
+    uint256 public mincontributionAmount = 10;
+    uint256 public maxcontributionAmount = 10000;
+    uint256 public timeDeployed;
+    uint256 public allowBuyingAfter = 0;
+
+
+    mapping(address => bool) public whiteList;
 
     event Buy(uint256 amount, address buyer);
     event Finalize(uint256 tokensSold, uint256 ethRaised);
@@ -16,12 +23,17 @@ contract Crowdsale {
     constructor(
         Token _token,
         uint256 _price,
-        uint256 _maxTokens
+        uint256 _maxTokens,
+        uint256 _allowBuyingingOn
     ) {
+        if (_allowBuyingingOn > block.timestamp) {
+        allowBuyingAfter = _allowBuyingingOn - block.timestamp;
+        }
         owner = msg.sender;
         token = _token;
         price = _price;
         maxTokens = _maxTokens;
+        timeDeployed = block.timestamp;
     }
 
     modifier onlyOwner() {
@@ -34,6 +46,10 @@ contract Crowdsale {
     }
 
     function buyTokens(uint256 _amount) public payable {
+        // require(
+        //     block.timestamp >= timeDeployed + allowBuyingAfter,
+        //     "Buying not allowed yet"
+        // );
         require(msg.value == (_amount / 1e18) * price);
         require(token.balanceOf(address(this)) >= _amount);
         require(token.transfer(msg.sender, _amount));
@@ -58,4 +74,13 @@ contract Crowdsale {
 
         emit Finalize(tokensSold, value);
     }
+
+    function getSecondsUntilStart() public view returns (uint256) {
+        if (block.timestamp < timeDeployed + allowBuyingAfter) {
+            return (timeDeployed + allowBuyingAfter) - block.timestamp;
+        } else {
+            return 0;
+        }
+    }
+
 }

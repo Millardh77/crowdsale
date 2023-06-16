@@ -9,7 +9,12 @@ const ether = tokens
 
 describe('Crowdsale', () => {
     let crowdsale, token
-    let accounts, deployer, user1
+    let accounts, deployer, user1, saletime
+    let result, timeDeployed
+    let milliseconds = 120000 // Number between 100000 - 999999
+
+    const MINUTES_TO_ADD = 60000 * 10  // 10 minutes
+    let BEGIN_CROWDSALE_DATE = 0
 
     beforeEach(async () => {
       // Load Contracts
@@ -23,17 +28,57 @@ describe('Crowdsale', () => {
       accounts = await ethers.getSigners()
       deployer = accounts[0]
       user1 = accounts[1]
+      
+      // Calculate Start Date
+      // 86400000 milliseconds = 1 day
+      // 3600000 milliseconds = 1 hour
+      // 60000 milliseconds = 1 minute
+      // 1000 milliseconds = 1 second
+
+      BEGIN_CROWDSALE_DATE = new Date().getTime() + (MINUTES_TO_ADD);
+      console.log("begin crowdsale dates: ", BEGIN_CROWDSALE_DATE, " milliseconds, ", Date(BEGIN_CROWDSALE_DATE))
+
 
       // Deploy Crowdsale
-      crowdsale = await Crowdsale.deploy(token.address, ether(1), '1000000')
+      crowdsale = await Crowdsale.deploy(token.address, ether(1), '1000000', BEGIN_CROWDSALE_DATE)
 
       // Send tokens to crowdsale
       let transaction = await token.connect(deployer).transfer(crowdsale.address, tokens(1000000))
       await transaction.wait()
+
     })
 
     describe('Deployment', () => {
-       
+
+      // var ms = new Date().getTime() + (86400000 * 100);
+      // var daysfromnow100 = new Date(ms);    
+      // var END_CROWDSALE_DATE = ms
+      // console.log("100 days from now:", daysfromnow100)
+      // console.log("right now:", new Date(Date.now()))
+      // console.log("end crowdsale date: ", END_CROWDSALE_DATE)
+
+      it('Returns how many seconds left until minting allowed', async () => {
+        let buffer = 2
+        let target = Number(milliseconds.toString().slice(0, 3))
+        result = await crowdsale.getSecondsUntilStart()
+        result = Number(result)
+        console.log("deployed dates: ", crowdsale.timeDeployed, " milliseconds, ", Date(crowdsale.timeDeployed))
+
+        console.log("Seconds until start:", result)
+        console.log("Target:", target)
+
+        expect(await crowdsale.getSecondsUntilStart()).to.be.greaterThan(target)
+
+        // NOTE: Sometimes the seconds may be off by 1, As long as the seconds are 
+        // between the buffer zone, we'll pass the test
+        // if (result > (target - buffer) && result <= target) {
+        //     assert.isTrue(true)
+        // } else {
+        //     assert.isTrue(false)
+        // }
+    })
+
+
       it('sends tokens to the Crowdsale contract', async () => {
         expect(await token.balanceOf(crowdsale.address)).to.equal(tokens(1000000))
       })
