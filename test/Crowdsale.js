@@ -9,7 +9,7 @@ const ether = tokens
 
 describe('Crowdsale', () => {
     let crowdsale, token
-    let accounts, deployer, user1, saletime
+    let accounts, deployer, user1, saletime, user2, user3
     let result, timeDeployed
     let milliseconds = 120000 // Number between 100000 - 999999
 
@@ -28,6 +28,8 @@ describe('Crowdsale', () => {
       accounts = await ethers.getSigners()
       deployer = accounts[0]
       user1 = accounts[1]
+      user2 = accounts[2]
+      user3 = accounts[3]
       
       // Calculate Start Date
       // 86400000 milliseconds = 1 day
@@ -35,8 +37,9 @@ describe('Crowdsale', () => {
       // 60000 milliseconds = 1 minute
       // 1000 milliseconds = 1 second
 
-      BEGIN_CROWDSALE_DATE = new Date().getTime() + (MINUTES_TO_ADD);
-      console.log("begin crowdsale dates: ", BEGIN_CROWDSALE_DATE, " milliseconds, ", Date(BEGIN_CROWDSALE_DATE))
+
+       BEGIN_CROWDSALE_DATE = new Date().getTime() + (MINUTES_TO_ADD);
+      // console.log("begin crowdsale dates: ", BEGIN_CROWDSALE_DATE, " milliseconds, ", Date(BEGIN_CROWDSALE_DATE))
 
 
       // Deploy Crowdsale
@@ -45,6 +48,10 @@ describe('Crowdsale', () => {
       // Send tokens to crowdsale
       let transaction = await token.connect(deployer).transfer(crowdsale.address, tokens(1000000))
       await transaction.wait()
+
+      transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[1].address)
+      transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[2].address)
+      result = await transaction.wait()
 
     })
 
@@ -62,10 +69,9 @@ describe('Crowdsale', () => {
         let target = Number(milliseconds.toString().slice(0, 3))
         result = await crowdsale.getSecondsUntilStart()
         result = Number(result)
-        console.log("deployed dates: ", crowdsale.timeDeployed, " milliseconds, ", Date(crowdsale.timeDeployed))
 
-        console.log("Seconds until start:", result)
-        console.log("Target:", target)
+        // console.log("Seconds until start:", result)
+        // console.log("Target:", target)
 
         expect(await crowdsale.getSecondsUntilStart()).to.be.greaterThan(target)
 
@@ -92,12 +98,61 @@ describe('Crowdsale', () => {
       })
     })
 
+    // describe('Adding tokens to Whitelist', () => {
+    //   let transaction, result
+  
+    //   describe('Success', () => {
+  
+    //     beforeEach(async () => {
+    //       transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[1].address)
+    //       transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[2].address)
+    //       result = await transaction.wait()
+    //       // whitelisted[0] = await crowdsale.whitelisted(accounts[1].address)
+    //       // whitelisted[1] = await crowdsale.whitelisted(accounts[2].address)
+    //       // console.log("Deployer Account:", accounts[0].address)
+    //       // console.log("Account 1:", accounts[1].address)
+    //       // console.log("Account 2:", accounts[2].address)
+    //     })
+  
+    //     it('tracks the newly created white list item', async () => {
+    //       // console.log("whitelist Account 1 #:", await crowdsale.whiteListed(accounts[1].address))
+    //       // console.log("whitelist Account 1:", await crowdsale.getWhiteListItem(0))
+    //       // console.log("whitelist Account 2 #:", await crowdsale.whiteListed(accounts[1].address))
+    //       // console.log("whitelist Account 2:", await crowdsale.getWhiteListItem(1))
+    //       expect(await crowdsale.whiteListed(accounts[1].address)).to.equal(1)
+    //       expect(await crowdsale.whiteListed(accounts[2].address)).to.equal(2)
+    //       expect(await crowdsale.getWhiteListItem(0)).to.equal(accounts[1].address)
+    //       expect(await crowdsale.getWhiteListItem(1)).to.equal(accounts[2].address)
+    //       expect(await crowdsale.whiteListCount()).to.equal(2)
+    //     })
+  
+    //     it('emits a white list event', async () => {
+    //       const event = result.events[0]
+    //       expect(event.event).to.equal('AddToWhitelist')
+  
+    //       // const args = event.args
+    //       // expect(args.id).to.equal(1)
+    //       // expect(args.user).to.equal(user1.address)
+    //     })
+  
+    //   })
+    //   describe('Failure', () => {
+    //     it('prevents non-owner from adding to whitelist', async () => {
+    //       await expect(crowdsale.connect(user1).addToWhiteList(user1.address)).to.be.reverted
+    //     })
+ 
+    //   })
+
+    // })
+
     describe('Buying Tokens', () => {
       let transaction, result
       let amount = tokens(10)
 
       describe('Success', () => {
         beforeEach(async () => {
+          // console.log("whitelist count:", await crowdsale.whiteListCount())
+          // console.log("whitelisted record:", await crowdsale.whiteListed(user1.address))
           transaction = await crowdsale.connect(user1).buyTokens(amount, { value: ether(10) })
           result = await transaction.wait()
         })
@@ -128,6 +183,9 @@ describe('Crowdsale', () => {
 
         it('rejects insufficent ETH', async () => {
           await expect(crowdsale.connect(user1).buyTokens(tokens(10), { value: 0 })).to.be.reverted
+        })
+        it('rejects not whitelisted', async () => {
+          await expect(crowdsale.connect(user3).buyTokens(tokens(10), { value: ether(10) })).to.be.reverted
         })
   
       })
@@ -221,6 +279,5 @@ describe('Crowdsale', () => {
  
       })
     })
-  
 
 })
