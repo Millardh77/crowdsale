@@ -16,6 +16,7 @@ describe('Crowdsale', () => {
 
     const MINUTES_TO_ADD = 60000 * 10  // 10 minutes
     let BEGIN_CROWDSALE_DATE = 0
+    let DEPLOY_TIME = 0
 
     beforeEach(async () => {
       // Load Contracts
@@ -40,12 +41,13 @@ describe('Crowdsale', () => {
 
 
        BEGIN_CROWDSALE_DATE = new Date().getTime() + (MINUTES_TO_ADD);
+       DEPLOY_TIME = new Date().getTime();
        //console.log("begin crowdsale dates: ", BEGIN_CROWDSALE_DATE, " milliseconds, ", Date(BEGIN_CROWDSALE_DATE))
 
 
 
       // Deploy Crowdsale
-      crowdsale = await Crowdsale.deploy(token.address, ether(1), '1000000', BEGIN_CROWDSALE_DATE)
+      crowdsale = await Crowdsale.deploy(token.address, ether(1), '1000000', DEPLOY_TIME, BEGIN_CROWDSALE_DATE)
 
       // Send tokens to crowdsale
       let transaction = await token.connect(deployer).transfer(crowdsale.address, tokens(1000000))
@@ -55,6 +57,14 @@ describe('Crowdsale', () => {
       // Add accounts to white list
       transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[1].address)
       transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[2].address)
+      await transaction.wait()
+
+      // Set minimum and maximum Contribution Amount
+      let minContribution, maxContribution
+      minContribution = 10
+      maxContribution = 1000
+      transaction = await crowdsale.connect(deployer).setMinContributionAmt(minContribution)
+      transaction = await crowdsale.connect(deployer).setMaxContributionAmt(maxContribution)
       await transaction.wait()
 
     })
@@ -76,18 +86,31 @@ describe('Crowdsale', () => {
         // var minutes = result / 60000
         // var dateFormat = new Date(result);
 
-        // timeDeployed = await crowdsale.getTimeDeployed();
-        // timeDeployed = Number(timeDeployed);
-        // allowBuyingAfter = await crowdsale.getAllowBuyingAfter();
-        // allowBuyingAfter = Number(allowBuyingAfter);
+        timeDeployed = await crowdsale.timeDeployed();
+        timeDeployed = Number(timeDeployed);
+        allowBuyingAfter = await crowdsale.allowBuyingAfter();
+        allowBuyingAfter = Number(allowBuyingAfter);
 
 
         // console.log("Seconds until start:", result)
         // console.log("Minutes until start:", minutes)
         // console.log("Target:", target)
         // console.log("Seconds until start Date Format:", dateFormat)
-        // console.log("Time Deployed:", new Date(timeDeployed))
-        // console.log("AllowBuyingAfter:", new Date(allowBuyingAfter))
+        console.log("Time Deployed:", new Date(timeDeployed))
+        console.log("AllowBuyingAfter:", new Date(allowBuyingAfter))
+ 
+              // Fetch min contribution
+          let minContribution = ethers.utils.formatUnits(await crowdsale.minContributionAmount(), 18)
+          const formattedMin = ethers.utils.parseUnits(minContribution.toString(), 'ether')
+           console.log("minContribution:", formattedMin)
+
+            // Fetch max contribution
+            let maxContribution = ethers.utils.formatUnits(await crowdsale.maxContributionAmount(), 18)
+            const formattedMax = ethers.utils.parseUnits(maxContribution.toString(), 'ether')
+            console.log("maxContribution:", formattedMax)
+     
+
+
 
         // const start = new Date();
         // // some long-running operation

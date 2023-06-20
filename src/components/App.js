@@ -26,8 +26,8 @@ function App() {
     const [crowdsale, setCrowdsale] = useState(null)  
     
     const [price, setPrice] = useState(0)
-    const [minContribution, setMinContribution] = useState(0)
-    const [MaxContribution, setMaxContribution] = useState(0)
+    const [minimumContribution, setMinContribution] = useState(0)
+    const [maximumContribution, setMaxContribution] = useState(0)
     const [maxTokens, setMaxTokens] = useState(0)
     const [tokensSold, setTokensSold] = useState(0)
   
@@ -59,6 +59,7 @@ function App() {
       // Fetch account balance
       const accountBalance = ethers.utils.formatUnits(await token.balanceOf(account), 18)
       setAccountBalance(accountBalance)
+      // console.log("accountBalance:", accountBalance)
 
       // Fetch price
       const price = ethers.utils.formatUnits(await crowdsale.price(), 18)
@@ -67,23 +68,48 @@ function App() {
       // Fetch max tokens
       const maxTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18)
       setMaxTokens(maxTokens)
+      console.log("maxTokens:", maxTokens)
 
       // Get Begin Contribution Time
-      const allowBuyingAfter = await crowdsale.getAllowBuyingAfter()
-			const timeDeployed = await crowdsale.getTimeDeployed()
+      let allowBuyingAfter = await crowdsale.allowBuyingAfter()
+      allowBuyingAfter = Number(allowBuyingAfter);
+
+			let timeDeployed = await crowdsale.timeDeployed()
+      timeDeployed = Number(timeDeployed);
+
 			setRevealTime((Number(timeDeployed) + Number(allowBuyingAfter)).toString() + '000')
+      console.log("allowBuyingAfter:", new Date(allowBuyingAfter))
+      console.log("timeDeployed:", new Date(timeDeployed))
+      console.log("current Time:", new Date(currentTime))
+      console.log("reveal Time:", new Date(revealTime))
+
+      const start = new Date();
+      // some long-running operation
+      const end = new Date(allowBuyingAfter);
+      const elapsed = Math.round((end.getTime() - start.getTime()) / (1000 * 60)); // elapsed time in minutes
+      console.log("elapsed:", elapsed);
+
 
       // Fetch tokens sold
-      const tokensSold = ethers.utils.formatUnits(await crowdsale.tokensSold(), 18)
+      let tokensSold = ethers.utils.formatUnits(await crowdsale.tokensSold(), 18)
+
       setTokensSold(tokensSold)
 
       // Fetch min contribution
-      const minContribution = ethers.utils.formatUnits(await crowdsale.mincontributionAmount(), 18)
+
+      const minContribution = await crowdsale.minContributionAmount()
+      //const minContribution = ethers.utils.parseUnits(await crowdsale.minContributionAmount().toString(), 'ether')
+      // const minContribution = ethers.utils.formatUnits(await crowdsale.minContributionAmount(), 18)
       setMinContribution(minContribution)
+      //const formattedMin = ethers.utils.parseUnits(minimumContribution.toString(), 'ether')
+      const formattedMin = ethers.utils.formatUnits(minimumContribution, 18)
+      console.log("minContribution:", formattedMin)
 
       // Fetch max contribution
-      const maxContribution = ethers.utils.formatUnits(await crowdsale.maxcontributionAmount(), 18)
+      const maxContribution = ethers.utils.formatUnits(await crowdsale.maxContributionAmount(), 18)
       setMaxContribution(maxContribution)
+      const formattedMax = ethers.utils.parseUnits(maximumContribution.toString(), 'ether')
+      console.log("maxContribution:", formattedMax)
      
 
       setIsLoading(false)

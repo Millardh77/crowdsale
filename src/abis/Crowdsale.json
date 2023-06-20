@@ -18,6 +18,11 @@
       },
       {
         "internalType": "uint256",
+        "name": "_deployTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
         "name": "_allowBuyingingOn",
         "type": "uint256"
       }
@@ -130,33 +135,7 @@
   },
   {
     "inputs": [],
-    "name": "getAllowBuyingAfter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "getSecondsUntilStart",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getTimeDeployed",
     "outputs": [
       {
         "internalType": "uint256",
@@ -188,6 +167,19 @@
   },
   {
     "inputs": [],
+    "name": "maxContributionAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "maxTokens",
     "outputs": [
       {
@@ -201,20 +193,7 @@
   },
   {
     "inputs": [],
-    "name": "maxcontributionAmount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "mincontributionAmount",
+    "name": "minContributionAmount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -249,6 +228,32 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_maxContributionAmt",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMaxContributionAmt",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_minContributionAmt",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMinContributionAmt",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

@@ -13,6 +13,7 @@ async function main() {
   const PRICE = ethers.utils.parseUnits('0.025', 'ether')
   const MINUTES_TO_ADD = 60000 * 10  // 10 minutes
   const BEGIN_CROWDSALE_DATE = new Date().getTime() + (MINUTES_TO_ADD);
+  const DEPLOY_TIME = new Date().getTime();
   let accounts, deployer, user1, saletime, user2, user3
 
 
@@ -25,7 +26,7 @@ async function main() {
 
   // Deploy Crowdsale
   const Crowdsale = await hre.ethers.getContractFactory("Crowdsale")
-  const crowdsale = await Crowdsale.deploy(token.address, PRICE, ethers.utils.parseUnits(MAX_SUPPLY, 'ether'), BEGIN_CROWDSALE_DATE)
+  const crowdsale = await Crowdsale.deploy(token.address, PRICE, ethers.utils.parseUnits(MAX_SUPPLY, 'ether'), DEPLOY_TIME, BEGIN_CROWDSALE_DATE)
   await crowdsale.deployed();
 
   console.log(`Crowdsale deployed to: ${crowdsale.address}\n`)
@@ -47,7 +48,15 @@ async function main() {
   await transaction.wait()
 
   console.log(`White Listed accounts added to Crowdsale\n`)
-  
+
+  // Set minimum and maximum Contribution Amount
+  let minContribution, maxContribution
+  minContribution = 10
+  maxContribution = 1000
+  transaction = await crowdsale.connect(deployer).setMinContributionAmt(minContribution)
+  transaction = await crowdsale.connect(deployer).setMaxContributionAmt(maxContribution)
+  await transaction.wait()
+  console.log(`Minimum and Maximum Contributions added to Crowdsale\n`)
   
 }
 
