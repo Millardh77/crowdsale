@@ -97,7 +97,7 @@ function App() {
 
       // Fetch min contribution
 
-      const minContribution = await crowdsale.minContributionAmount()
+      const minContribution = await crowdsale.minContributionAmount();
       //const minContribution = ethers.utils.parseUnits(await crowdsale.minContributionAmount().toString(), 'ether')
       // const minContribution = ethers.utils.formatUnits(await crowdsale.minContributionAmount(), 18)
       setMinContribution(minContribution)
