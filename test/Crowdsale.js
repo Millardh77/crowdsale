@@ -1,5 +1,6 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
+const moment = require('moment') 
 
 const tokens = (n) => {
   return ethers.utils.parseUnits(n.toString(), 'ether')
@@ -10,7 +11,7 @@ const ether = tokens
 describe('Crowdsale', () => {
     let crowdsale, token
     let accounts, deployer, user1, saletime, user2, user3
-    let result, timeDeployed
+    let result, timeDeployed, allowBuyingAfter
     let milliseconds = 120000 // Number between 100000 - 999999
 
     const MINUTES_TO_ADD = 60000 * 10  // 10 minutes
@@ -39,7 +40,8 @@ describe('Crowdsale', () => {
 
 
        BEGIN_CROWDSALE_DATE = new Date().getTime() + (MINUTES_TO_ADD);
-      // console.log("begin crowdsale dates: ", BEGIN_CROWDSALE_DATE, " milliseconds, ", Date(BEGIN_CROWDSALE_DATE))
+       //console.log("begin crowdsale dates: ", BEGIN_CROWDSALE_DATE, " milliseconds, ", Date(BEGIN_CROWDSALE_DATE))
+
 
 
       // Deploy Crowdsale
@@ -49,9 +51,11 @@ describe('Crowdsale', () => {
       let transaction = await token.connect(deployer).transfer(crowdsale.address, tokens(1000000))
       await transaction.wait()
 
+
+      // Add accounts to white list
       transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[1].address)
       transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[2].address)
-      result = await transaction.wait()
+      await transaction.wait()
 
     })
 
@@ -67,11 +71,29 @@ describe('Crowdsale', () => {
       it('Returns how many seconds left until minting allowed', async () => {
         let buffer = 2
         let target = Number(milliseconds.toString().slice(0, 3))
-        result = await crowdsale.getSecondsUntilStart()
-        result = Number(result)
+        // result = await crowdsale.getSecondsUntilStart()
+        // result = Number(result)
+        // var minutes = result / 60000
+        // var dateFormat = new Date(result);
+
+        // timeDeployed = await crowdsale.getTimeDeployed();
+        // timeDeployed = Number(timeDeployed);
+        // allowBuyingAfter = await crowdsale.getAllowBuyingAfter();
+        // allowBuyingAfter = Number(allowBuyingAfter);
+
 
         // console.log("Seconds until start:", result)
+        // console.log("Minutes until start:", minutes)
         // console.log("Target:", target)
+        // console.log("Seconds until start Date Format:", dateFormat)
+        // console.log("Time Deployed:", new Date(timeDeployed))
+        // console.log("AllowBuyingAfter:", new Date(allowBuyingAfter))
+
+        // const start = new Date();
+        // // some long-running operation
+        // const end = new Date(BEGIN_CROWDSALE_DATE);
+        // const elapsed = Math.round((end.getTime() - start.getTime()) / (1000 * 60)); // elapsed time in minutes
+        // console.log("elapsed:", elapsed);
 
         expect(await crowdsale.getSecondsUntilStart()).to.be.greaterThan(target)
 

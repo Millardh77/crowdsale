@@ -1,0 +1,5 @@
+.countdown {
+    font-family: "Rubik";
+    font-weight: 700;
+    font-size: clamp(3rem, 5vw, 4rem);
+}

@@ -111,6 +111,12 @@ contract Crowdsale {
 
             return whitelist.user;
         }
+    function getAllowBuyingAfter() public view returns (uint256) {
+            return allowBuyingAfter;
+        }
+    function getTimeDeployed() public view returns (uint256) {
+            return block.timestamp;
+        }
     function getSecondsUntilStart() public view returns (uint256) {
         if (block.timestamp < timeDeployed + allowBuyingAfter) {
             return (timeDeployed + allowBuyingAfter) - block.timestamp;

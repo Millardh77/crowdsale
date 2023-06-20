@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import { ethers } from 'ethers'
+import Countdown from 'react-countdown'
 
 // Components
 import Navigation from './Navigation';
@@ -8,6 +9,7 @@ import Progress from './Progress';
 import Buy from './Buy';
 import Info from './Info';
 import Loading from './Loading';
+import '../App.css'
 
 // Artifacts
 import CROWDSALE_ABI from '../abis/Crowdsale.json'
@@ -24,11 +26,16 @@ function App() {
     const [crowdsale, setCrowdsale] = useState(null)  
     
     const [price, setPrice] = useState(0)
+    const [minContribution, setMinContribution] = useState(0)
+    const [MaxContribution, setMaxContribution] = useState(0)
     const [maxTokens, setMaxTokens] = useState(0)
     const [tokensSold, setTokensSold] = useState(0)
   
 
     const [isLoading, setIsLoading] = useState(true)
+
+    const [currentTime, setCurrentTime] = useState(new Date().getTime())
+    const [revealTime, setRevealTime] = useState(0)
 
     const loadBlockchainData = async () => {
       // Intiantiate provider
@@ -61,10 +68,23 @@ function App() {
       const maxTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18)
       setMaxTokens(maxTokens)
 
+      // Get Begin Contribution Time
+      const allowBuyingAfter = await crowdsale.getAllowBuyingAfter()
+			const timeDeployed = await crowdsale.getTimeDeployed()
+			setRevealTime((Number(timeDeployed) + Number(allowBuyingAfter)).toString() + '000')
+
       // Fetch tokens sold
       const tokensSold = ethers.utils.formatUnits(await crowdsale.tokensSold(), 18)
       setTokensSold(tokensSold)
 
+      // Fetch min contribution
+      const minContribution = ethers.utils.formatUnits(await crowdsale.mincontributionAmount(), 18)
+      setMinContribution(minContribution)
+
+      // Fetch max contribution
+      const maxContribution = ethers.utils.formatUnits(await crowdsale.maxcontributionAmount(), 18)
+      setMaxContribution(maxContribution)
+     
 
       setIsLoading(false)
     }
@@ -91,8 +111,11 @@ function App() {
         </>
       )}
             <hr />
-            {account && (
+            {account && (<>
+             <h3>Add your Contribution in</h3>
+						{revealTime !== 0 && <Countdown date={currentTime + (revealTime - currentTime)} className='countdown' />}
         <Info account={account} accountBalance={accountBalance} />
+        </>
         )}
 
         </Container>
