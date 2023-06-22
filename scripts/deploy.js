@@ -29,7 +29,15 @@ async function main() {
   const crowdsale = await Crowdsale.deploy(token.address, PRICE, ethers.utils.parseUnits(MAX_SUPPLY, 'ether'), DEPLOY_TIME, BEGIN_CROWDSALE_DATE)
   await crowdsale.deployed();
 
+  let timeDeployed = await crowdsale.timeDeployed();
+  timeDeployed = Number(timeDeployed);
+  let allowBuyingAfter = await crowdsale.allowBuyingAfter();
+  allowBuyingAfter = Number(allowBuyingAfter);
+
+
   console.log(`Crowdsale deployed to: ${crowdsale.address}\n`)
+  console.log("Time Deployed:", new Date(timeDeployed))
+  console.log("AllowBuyingAfter:", new Date(allowBuyingAfter))
 
   let transaction = await token.transfer(crowdsale.address, ethers.utils.parseUnits(MAX_SUPPLY, 'ether'))
   await transaction.wait()
@@ -51,12 +59,16 @@ async function main() {
 
   // Set minimum and maximum Contribution Amount
   let minContribution, maxContribution
-  minContribution = 10
-  maxContribution = 1000
+  minContribution = '10'
+  maxContribution = '1000'
+  minContribution = ethers.utils.parseUnits(minContribution, 'ether')
+  maxContribution = ethers.utils.parseUnits(maxContribution, 'ether')
   transaction = await crowdsale.connect(deployer).setMinContributionAmt(minContribution)
   transaction = await crowdsale.connect(deployer).setMaxContributionAmt(maxContribution)
   await transaction.wait()
   console.log(`Minimum and Maximum Contributions added to Crowdsale\n`)
+  // console.log(`Minimum Contributions :`, await crowdsale.minContributionAmount())
+  // console.log(`Maximum Contributions :`, await crowdsale.maxContributionAmount())
   
 }
 

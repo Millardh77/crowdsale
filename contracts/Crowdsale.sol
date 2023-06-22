@@ -37,15 +37,15 @@ contract Crowdsale {
         Token _token,
         uint256 _price,
         uint256 _maxTokens,
-        uint256 _deployTime,
-        uint256 _allowBuyingingOn
+        uint256 _timeDeployed,
+        uint256 _allowBuyingingAfter
     ) {
-      allowBuyingAfter = _allowBuyingingOn;
+        allowBuyingAfter = _allowBuyingingAfter;
         owner = msg.sender;
         token = _token;
         price = _price;
         maxTokens = _maxTokens;
-        timeDeployed = _deployTime;
+        timeDeployed = _timeDeployed;
     }
 
     modifier onlyOwner() {
@@ -97,6 +97,13 @@ contract Crowdsale {
 
         emit Finalize(tokensSold, value);
     }
+    function getSecondsUntilStart() public view returns (uint256) {
+        if (timeDeployed < timeDeployed + allowBuyingAfter) {
+            return (timeDeployed + allowBuyingAfter) - timeDeployed;
+        } else {
+            return 0;
+        }
+    }
     function addToWhiteList( address _whiteListAddress) public onlyOwner {
         whiteListCount ++;
         // Add address to White List
@@ -119,24 +126,4 @@ contract Crowdsale {
 
             return whitelist.user;
         }
-    // function getAllowBuyingAfter() public view returns (uint256) {
-    //         return allowBuyingAfter;
-    //     }
-    // function getTimeDeployed() public view returns (uint256) {
-    //         return block.timestamp;
-    //     }
-    function getSecondsUntilStart() public view returns (uint256) {
-        if (timeDeployed < timeDeployed + allowBuyingAfter) {
-            return (timeDeployed + allowBuyingAfter) - timeDeployed;
-        } else {
-            return 0;
-        }
-    }
-    // function getMinContributionAmt() public view returns (uint256) {
-    //         return minContributionAmount;
-    //     }
-    // function getMaxContributionAmt() public view returns (uint256) {
-    //         return maxContributionAmount;
-    //     }
-
 }

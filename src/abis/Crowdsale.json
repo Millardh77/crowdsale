@@ -18,12 +18,12 @@
       },
       {
         "internalType": "uint256",
-        "name": "_deployTime",
+        "name": "_timeDeployed",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "_allowBuyingingOn",
+        "name": "_allowBuyingingAfter",
         "type": "uint256"
       }
     ],

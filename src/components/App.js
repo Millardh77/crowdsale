@@ -71,13 +71,10 @@ function App() {
       console.log("maxTokens:", maxTokens)
 
       // Get Begin Contribution Time
-      let allowBuyingAfter = await crowdsale.allowBuyingAfter()
-      allowBuyingAfter = Number(allowBuyingAfter);
-
-			let timeDeployed = await crowdsale.timeDeployed()
-      timeDeployed = Number(timeDeployed);
-
+      let allowBuyingAfter = Number(await crowdsale.allowBuyingAfter())
+			let timeDeployed = await Number(await crowdsale.timeDeployed())
 			setRevealTime((Number(timeDeployed) + Number(allowBuyingAfter)).toString() + '000')
+      
       console.log("allowBuyingAfter:", new Date(allowBuyingAfter))
       console.log("timeDeployed:", new Date(timeDeployed))
       console.log("current Time:", new Date(currentTime))
@@ -97,19 +94,23 @@ function App() {
 
       // Fetch min contribution
 
-      const minContribution = await crowdsale.minContributionAmount();
+      const minContribution = Number(await crowdsale.minContributionAmount());
+      console.log("unformatted minContribution:", minContribution)
       //const minContribution = ethers.utils.parseUnits(await crowdsale.minContributionAmount().toString(), 'ether')
-      // const minContribution = ethers.utils.formatUnits(await crowdsale.minContributionAmount(), 18)
-      setMinContribution(minContribution)
+      // minContribution = ethers.utils.formatUnits(await crowdsale.minContributionAmount(), 18)
+      // setMinContribution(minContribution)
       //const formattedMin = ethers.utils.parseUnits(minimumContribution.toString(), 'ether')
-      const formattedMin = ethers.utils.formatUnits(minimumContribution, 18)
-      console.log("minContribution:", formattedMin)
+      //const formattedMin = ethers.utils.formatUnits(minimumContribution, 18)
+      // console.log("minContribution:", minimumContribution)
 
       // Fetch max contribution
-      const maxContribution = ethers.utils.formatUnits(await crowdsale.maxContributionAmount(), 18)
-      setMaxContribution(maxContribution)
-      const formattedMax = ethers.utils.parseUnits(maximumContribution.toString(), 'ether')
-      console.log("maxContribution:", formattedMax)
+      const maxContribution = Number(await crowdsale.maxContributionAmount());
+      console.log("unformatted maxContribution:", maxContribution)
+
+      // const maxContribution = ethers.utils.formatUnits(await crowdsale.maxContributionAmount(), 18)
+      // setMaxContribution(maxContribution)
+      // // const formattedMax = ethers.utils.parseUnits(maximumContribution.toString(), 'ether')
+      // console.log("maxContribution:", maximumContribution)
      
 
       setIsLoading(false)
@@ -138,8 +139,8 @@ function App() {
       )}
             <hr />
             {account && (<>
-             <h3>Add your Contribution in</h3>
-						{revealTime !== 0 && <Countdown date={currentTime + (revealTime - currentTime)} className='countdown' />}
+             {/* <h3>Add your Contribution in</h3>
+						{revealTime !== 0 && <Countdown date={currentTime + (revealTime - currentTime)} className='countdown' />} */}
         <Info account={account} accountBalance={accountBalance} />
         </>
         )}

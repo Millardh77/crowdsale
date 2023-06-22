@@ -61,11 +61,13 @@ describe('Crowdsale', () => {
 
       // Set minimum and maximum Contribution Amount
       let minContribution, maxContribution
-      minContribution = 10
-      maxContribution = 1000
+      minContribution = '10'
+      maxContribution = '1000'
+      minContribution = ethers.utils.parseUnits(minContribution, 'ether')
+      maxContribution = ethers.utils.parseUnits(maxContribution, 'ether')
       transaction = await crowdsale.connect(deployer).setMinContributionAmt(minContribution)
       transaction = await crowdsale.connect(deployer).setMaxContributionAmt(maxContribution)
-      await transaction.wait()
+          await transaction.wait()
 
     })
 
@@ -102,12 +104,14 @@ describe('Crowdsale', () => {
               // Fetch min contribution
           let minContribution = ethers.utils.formatUnits(await crowdsale.minContributionAmount(), 18)
           const formattedMin = ethers.utils.parseUnits(minContribution.toString(), 'ether')
-           console.log("minContribution:", formattedMin)
+           console.log("minContribution:", minContribution)
+          //  console.log("minContribution:", formattedMin)
 
             // Fetch max contribution
             let maxContribution = ethers.utils.formatUnits(await crowdsale.maxContributionAmount(), 18)
             const formattedMax = ethers.utils.parseUnits(maxContribution.toString(), 'ether')
-            console.log("maxContribution:", formattedMax)
+            console.log("maxContribution:", maxContribution)
+            // console.log("maxContribution:", formattedMax)
      
 
 
