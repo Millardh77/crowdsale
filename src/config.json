@@ -1,10 +1,10 @@
 {
     "31337": {
         "token": {
-            "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+            "address": "0xde79380FBd39e08150adAA5C6c9dE3146f53029e"
         },
         "crowdsale": {
-            "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+            "address": "0xbFD3c8A956AFB7a9754C951D03C9aDdA7EC5d638"
         }
     }
 }

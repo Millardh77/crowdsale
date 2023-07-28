@@ -12,24 +12,16 @@ contract Crowdsale {
     uint256 public minContributionAmount;
     uint256 public maxContributionAmount;
     uint256 public timeDeployed;
-    uint256 public allowBuyingAfter = 0;
+    uint256 public allowBuyingAfter;
 
-
-    mapping(uint256 => _Whitelist) public whiteLists;
-    mapping(address => uint256) public whiteListed;
+    mapping(address => bool) public whiteListed;
 
     uint256 public whiteListCount = 0;
 
     event Buy(uint256 amount, address buyer);
     event Finalize(uint256 tokensSold, uint256 ethRaised);
-    struct _Whitelist {
-        // Attributes of an whitelist
-        uint256 id; // Unique identifier for whitelisted user
-        address user; // User added to whitelist
-    }
 
     event AddToWhitelist(
-        uint256 id,
         address user
     );
 
@@ -62,8 +54,9 @@ contract Crowdsale {
         //     block.timestamp >= timeDeployed + allowBuyingAfter,
         //     "Buying not allowed yet"
         // );
+        // require(block.timestamp >= allowBuyingAfter, "not time to buy yet");
         require(whiteListCount > 0);
-        require(whiteListed[msg.sender] > 0);
+        require(whiteListed[msg.sender]);
         require(msg.value == (_amount / 1e18) * price);
         require(token.balanceOf(address(this)) >= _amount);
         require(token.transfer(msg.sender, _amount));
@@ -97,33 +90,12 @@ contract Crowdsale {
 
         emit Finalize(tokensSold, value);
     }
-    function getSecondsUntilStart() public view returns (uint256) {
-        if (timeDeployed < timeDeployed + allowBuyingAfter) {
-            return (timeDeployed + allowBuyingAfter) - timeDeployed;
-        } else {
-            return 0;
-        }
-    }
     function addToWhiteList( address _whiteListAddress) public onlyOwner {
         whiteListCount ++;
-        // Add address to White List
-        whiteLists[whiteListCount - 1] = _Whitelist(
-            whiteListCount,
-            _whiteListAddress
-        );
-        whiteListed[_whiteListAddress] = whiteListCount;
+        whiteListed[_whiteListAddress] = true;
         // Emit event
         emit AddToWhitelist(
-            whiteListCount,
             _whiteListAddress
         );
-
     }
-    function getWhiteListItem(uint256 _id) public view returns (address)
-        {
-            // Fetch white list item
-            _Whitelist storage whitelist = whiteLists[_id];
-
-            return whitelist.user;
-        }
 }

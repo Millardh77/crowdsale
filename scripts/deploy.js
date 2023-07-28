@@ -11,7 +11,7 @@ async function main() {
   const SYMBOL = 'DAPP'
   const MAX_SUPPLY = '1000000'
   const PRICE = ethers.utils.parseUnits('0.025', 'ether')
-  const MINUTES_TO_ADD = 60000 * 10  // 10 minutes
+  const MINUTES_TO_ADD = 60000 * 1  // 10 minutes
   const BEGIN_CROWDSALE_DATE = new Date().getTime() + (MINUTES_TO_ADD);
   const DEPLOY_TIME = new Date().getTime();
   let accounts, deployer, user1, saletime, user2, user3

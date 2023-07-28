@@ -15,8 +15,11 @@ describe('Crowdsale', () => {
     let milliseconds = 120000 // Number between 100000 - 999999
 
     const MINUTES_TO_ADD = 60000 * 10  // 10 minutes
-    let BEGIN_CROWDSALE_DATE = 0
-    let DEPLOY_TIME = 0
+    const BEGIN_CROWDSALE_DATE = (new Date().getTime() + (MINUTES_TO_ADD)).toString().slice(0, 10);
+    const DEPLOY_TIME = new Date().getTime();
+
+    // let BEGIN_CROWDSALE_DATE = 0
+    // let DEPLOY_TIME = 0
 
     beforeEach(async () => {
       // Load Contracts
@@ -40,8 +43,7 @@ describe('Crowdsale', () => {
       // 1000 milliseconds = 1 second
 
 
-       BEGIN_CROWDSALE_DATE = new Date().getTime() + (MINUTES_TO_ADD);
-       DEPLOY_TIME = new Date().getTime();
+       //BEGIN_CROWDSALE_DATE = new Date().getTime() + (MINUTES_TO_ADD);
        //console.log("begin crowdsale dates: ", BEGIN_CROWDSALE_DATE, " milliseconds, ", Date(BEGIN_CROWDSALE_DATE))
 
 
@@ -73,33 +75,28 @@ describe('Crowdsale', () => {
 
     describe('Deployment', () => {
 
-      // var ms = new Date().getTime() + (86400000 * 100);
-      // var daysfromnow100 = new Date(ms);    
-      // var END_CROWDSALE_DATE = ms
-      // console.log("100 days from now:", daysfromnow100)
-      // console.log("right now:", new Date(Date.now()))
-      // console.log("end crowdsale date: ", END_CROWDSALE_DATE)
-
       it('Returns how many seconds left until minting allowed', async () => {
-        let buffer = 2
-        let target = Number(milliseconds.toString().slice(0, 3))
-        // result = await crowdsale.getSecondsUntilStart()
-        // result = Number(result)
-        // var minutes = result / 60000
-        // var dateFormat = new Date(result);
+        expect(await crowdsale.allowBuyingAfter()).to.equal(BEGIN_CROWDSALE_DATE)
 
-        timeDeployed = await crowdsale.timeDeployed();
-        timeDeployed = Number(timeDeployed);
-        allowBuyingAfter = await crowdsale.allowBuyingAfter();
-        allowBuyingAfter = Number(allowBuyingAfter);
+        // let buffer = 2
+        // let target = Number(milliseconds.toString().slice(0, 3))
+        // // result = await crowdsale.getSecondsUntilStart()
+        // // result = Number(result)
+        // // var minutes = result / 60000
+        // // var dateFormat = new Date(result);
+
+        // timeDeployed = await crowdsale.timeDeployed();
+        // timeDeployed = Number(timeDeployed);
+        // allowBuyingAfter = await crowdsale.allowBuyingAfter();
+        // allowBuyingAfter = Number(allowBuyingAfter);
 
 
-        // console.log("Seconds until start:", result)
-        // console.log("Minutes until start:", minutes)
-        // console.log("Target:", target)
-        // console.log("Seconds until start Date Format:", dateFormat)
-        console.log("Time Deployed:", new Date(timeDeployed))
-        console.log("AllowBuyingAfter:", new Date(allowBuyingAfter))
+        // // console.log("Seconds until start:", result)
+        // // console.log("Minutes until start:", minutes)
+        // // console.log("Target:", target)
+        // // console.log("Seconds until start Date Format:", dateFormat)
+        // console.log("Time Deployed:", new Date(timeDeployed))
+        // console.log("AllowBuyingAfter:", new Date(allowBuyingAfter))
  
               // Fetch min contribution
           let minContribution = ethers.utils.formatUnits(await crowdsale.minContributionAmount(), 18)
@@ -116,21 +113,6 @@ describe('Crowdsale', () => {
 
 
 
-        // const start = new Date();
-        // // some long-running operation
-        // const end = new Date(BEGIN_CROWDSALE_DATE);
-        // const elapsed = Math.round((end.getTime() - start.getTime()) / (1000 * 60)); // elapsed time in minutes
-        // console.log("elapsed:", elapsed);
-
-        expect(await crowdsale.getSecondsUntilStart()).to.be.greaterThan(target)
-
-        // NOTE: Sometimes the seconds may be off by 1, As long as the seconds are 
-        // between the buffer zone, we'll pass the test
-        // if (result > (target - buffer) && result <= target) {
-        //     assert.isTrue(true)
-        // } else {
-        //     assert.isTrue(false)
-        // }
     })
 
 
@@ -199,9 +181,29 @@ describe('Crowdsale', () => {
       let amount = tokens(10)
 
       describe('Success', () => {
+        const BEGIN_CROWDSALE_DATE = Date.now().toString().slice(0,10) // Now
         beforeEach(async () => {
+           console.log("begin crowdsale dates: ", BEGIN_CROWDSALE_DATE, " milliseconds, ", Date(BEGIN_CROWDSALE_DATE))
           // console.log("whitelist count:", await crowdsale.whiteListCount())
           // console.log("whitelisted record:", await crowdsale.whiteListed(user1.address))
+          const Token = await ethers.getContractFactory('Token')
+
+          // Deploy token
+          token = await Token.deploy('Dapp University', 'DAPP', '1000000')
+    
+          const Crowdsale = await ethers.getContractFactory('Crowdsale')
+          crowdsale = await Crowdsale.deploy(token.address, ether(1), '1000000', DEPLOY_TIME, BEGIN_CROWDSALE_DATE)
+      
+          // Send tokens to crowdsale
+          transaction = await token.connect(deployer).transfer(crowdsale.address, tokens(1000000))
+          await transaction.wait()
+
+          // Add accounts to white list
+          transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[1].address)
+          transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[2].address)
+          await transaction.wait()
+
+          // Buy tokens
           transaction = await crowdsale.connect(user1).buyTokens(amount, { value: ether(10) })
           result = await transaction.wait()
         })
@@ -246,13 +248,45 @@ describe('Crowdsale', () => {
       let amount = ether(10)
   
       describe('Success', () => {
-  
+        const BEGIN_CROWDSALE_DATE = Date.now().toString().slice(0,10) // Now
         beforeEach(async () => {
-          transaction = await user1.sendTransaction({ to: crowdsale.address, value: amount })
+          const Token = await ethers.getContractFactory('Token')
+
+          // Deploy token
+          token = await Token.deploy('Dapp University', 'DAPP', '1000000')
+    
+          const Crowdsale = await ethers.getContractFactory('Crowdsale')
+          crowdsale = await Crowdsale.deploy(token.address, ether(1), '1000000', DEPLOY_TIME, BEGIN_CROWDSALE_DATE)
+          
+          accounts = await ethers.getSigners()
+          deployer = accounts[0]
+          user1 = accounts[1]
+    
+          // Send tokens to crowdsale
+          transaction = await token.connect(deployer).transfer(crowdsale.address, tokens(1000000))
+          await transaction.wait()
+
+          // Add accounts to white list
+          transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[1].address)
+          transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[2].address)
+          await transaction.wait()
+         
+
+          // Buy tokens
+          transaction = await crowdsale.connect(user1).buyTokens(amount, { value: ether(10) })
           result = await transaction.wait()
+          
+
+          console.log(`User balance: ${await token.balanceOf(user1.address)}`)
+          console.log(`amount: ${amount}`)
+          console.log(`crowdsale balance before: ${await token.balanceOf(crowdsale.address)}`)
+          // transaction = await user1.sendTransaction({ to: crowdsale.address, value: amount })
+          // result = await transaction.wait()
         })
   
         it('updates contracts ether balance', async () => {
+          console.log(`amount: ${amount}\n`)
+          console.log(`crowdsale balance: ${await ethers.provider.getBalance(crowdsale.address)}`)
           expect(await ethers.provider.getBalance(crowdsale.address)).to.equal(amount)
         })
   
@@ -295,7 +329,25 @@ describe('Crowdsale', () => {
       let value = ether(10)
 
       describe('Success', () => {
+        const BEGIN_CROWDSALE_DATE = Date.now().toString().slice(0,10) // Now
         beforeEach(async () => {
+          const Token = await ethers.getContractFactory('Token')
+
+          // Deploy token
+          token = await Token.deploy('Dapp University', 'DAPP', '1000000')
+    
+          const Crowdsale = await ethers.getContractFactory('Crowdsale')
+          crowdsale = await Crowdsale.deploy(token.address, ether(1), '1000000', DEPLOY_TIME, BEGIN_CROWDSALE_DATE)
+
+          // Send tokens to crowdsale
+          transaction = await token.connect(deployer).transfer(crowdsale.address, tokens(1000000))
+          await transaction.wait()
+
+          // Add accounts to white list
+          transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[1].address)
+          transaction = await crowdsale.connect(deployer).addToWhiteList(accounts[2].address)
+          await transaction.wait()
+
           transaction = await crowdsale.connect(user1).buyTokens(amount, { value: value })
           result = await transaction.wait()
   
